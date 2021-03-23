@@ -79,7 +79,125 @@ remove() vs poll()
 Queue<TreeNode> level = new LinkedList<>();
 ```
 
-#### Collection
+## Collection
+
+#### static api
+
+
+
+### Map
+
+#### TreeMap
+
+##### Default Sorting in TreeMap
+
+By default, *TreeMap* sorts all its entries according to their natural ordering. For an integer, this would mean ascending order and for strings, alphabetical order.
+
+```java
+
+public void givenTreeMap_whenOrdersEntriesNaturally_thenCorrect() {
+    TreeMap<Integer, String> map = new TreeMap<>();
+    map.put(3, "val");
+    map.put(2, "val");
+    map.put(1, "val");
+    map.put(5, "val");
+    map.put(4, "val");
+
+    assertEquals("[1, 2, 3, 4, 5]", map.keySet().toString());
+}
+```
+
+##### Custom Sorting in TreeMap
+
+If we're not satisfied with the natural ordering of *TreeMap*, we can also define our own rule for ordering by means of a comparator during construction of a tree map.
+
+In the example below, we want the integer keys to be ordered in descending order:
+
+```java
+@Test
+public void givenTreeMap_whenOrdersEntriesByComparator_thenCorrect() {
+    TreeMap<Integer, String> map = 
+      new TreeMap<>(Comparator.reverseOrder());
+    map.put(3, "val");
+    map.put(2, "val");
+    map.put(1, "val");
+    map.put(5, "val");
+    map.put(4, "val");
+        
+    assertEquals("[5, 4, 3, 2, 1]", map.keySet().toString());
+}
+```
+
+##### Useful api
+
+We now know that *TreeMap* stores all its entries in sorted order. Because of this attribute of tree maps, we can perform queries like; find “largest”, find “smallest”, find all keys less than or greater than a certain value, etc.
+
+The code below only covers a small percentage of these cases:
+
+```java
+@Test
+public void givenTreeMap_whenPerformsQueries_thenCorrect() {
+    TreeMap<Integer, String> map = new TreeMap<>();
+    map.put(3, "val");
+    map.put(2, "val");
+    map.put(1, "val");
+    map.put(5, "val");
+    map.put(4, "val");
+        
+    Integer highestKey = map.lastKey();
+    Integer lowestKey = map.firstKey();
+    Set<Integer> keysLessThan3 = map.headMap(3).keySet();
+    Set<Integer> keysGreaterThanEqTo3 = map.tailMap(3).keySet();
+
+    assertEquals(new Integer(5), highestKey);
+    assertEquals(new Integer(1), lowestKey);
+    assertEquals("[1, 2]", keysLessThan3.toString());
+    assertEquals("[3, 4, 5]", keysGreaterThanEqTo3.toString());
+}
+/*
+floorEntry(K key)
+Returns a key-value mapping associated with the greatest key less than or equal to the given key, or null if there is no such key.
+floorKey(K key)
+Returns the greatest key less than or equal to the given key, or null if there is no such key.
+higherEntry(K key)
+Returns a key-value mapping associated with the least key strictly greater than the given key, or null if there is no such key.
+higherKey(K key)
+Returns the least key strictly greater than the given key, or null if there is no such key.
+*/
+```
+
+##### Internal Implementation of TreeMap
+
+>
+>
+>*TreeMap* implements *NavigableMap* interface and bases its internal working on the principles of [red-black trees](https://www.baeldung.com/cs/red-black-trees):
+>
+>```java
+>public class TreeMap<K,V> extends AbstractMap<K,V>
+>  implements NavigableMap<K,V>, Cloneable, java.io.Serializable
+>```
+>
+>The principle of red-black trees is beyond the scope of this article, however, there are key things to remember in order to understand how they fit into *TreeMap*.
+>
+>**First of all**, a red-black tree is a data structure that consists of nodes; picture an inverted mango tree with its root in the sky and the branches growing downward. The root will contain the first element added to the tree.
+>
+>The rule is that starting from the root, any element in the left branch of any node is always less than the element in the node itself. Those on the right are always greater. What defines greater or less than is determined by the natural ordering of the elements or the defined comparator at construction as we saw earlier.
+>
+>This rule guarantees that the entries of a treemap will always be in sorted and predictable order.
+>
+>**Secondly**, a red-black tree is a self-balancing binary search tree. This attribute and the above guarantee that basic operations like search, get, put and remove take logarithmic time *O(log n)*.
+>
+>Being self-balancing is key here. As we keep inserting and deleting entries, picture the tree growing longer on one edge or shorter on the other.
+>
+>This would mean that an operation would take a shorter time on the shorter branch and longer time on the branch which is furthest from the root, something we would not want to happen.
+>
+>Therefore, this is taken care of in the design of red-black trees. For every insertion and deletion, the maximum height of the tree on any edge is maintained at *O(log n)* i.e. the tree balances itself continuously.
+>
+>Just like hash map and linked hash map, a tree map is not synchronized and therefore the rules for using it in a multi-threaded environment are similar to those in the other two map implementations.
+
+#### LinkedHashMap
+
+#### HashMap
 
 ```
 sort
