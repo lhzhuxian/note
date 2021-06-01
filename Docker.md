@@ -1,6 +1,9 @@
 **Image 命令**
 
 ```
+// build the app's container image
+docker build -t getting-started . 
+
 docker images
 
 docker search
