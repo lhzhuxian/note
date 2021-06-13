@@ -51,6 +51,10 @@ Another important consideration while designing a distributed system is how easy
 
 **Early detection of faults** can decrease or avoid system downtime. For example, some enterprise systems can automatically call a service center (without human intervention) when the system experiences a system fault.
 
+# CAP Theorem
+
+
+
 # Load Balancing
 
 ![](/Users/h0l04gn/Workspace/Note/static/Screen Shot 2021-04-01 at 07.50.10.png)
@@ -110,6 +114,38 @@ So we’ll find the shard number by **UserID % 10** and then store the data ther
 **How can we generate PhotoIDs?** Here, we cannot have an auto-incrementing sequence in each shard to define PhotoID because we need to know PhotoID first to find the shard where it will be stored. One solution could be that we dedicate a separate database instance to generate auto-incrementing IDs. If our PhotoID can fit into 64 bits, we can define a table containing only a 64 bit ID field. So whenever we would like to add a photo in our system, we can insert a new row in this table and take that ID to be our PhotoID of the new photo.
 
 **Wouldn’t this key generating DB be a single point of failure?** Yes, it would be. A workaround for that could be to define two such databases, one generating even-numbered IDs and the other odd-numbered. For MySQL, the following script can define such sequences:
+
+### Data Partitioning
+
+Data partitioning is a technique to break up a big database (DB) into many smaller parts. It is the process of splitting up a DB/table across multiple machines to improve the manageability, performance, availability, and load balancing of an application.
+
+#### Partitioning Methods
+
+1. **Horizontal partitioning**
+
+   In this scheme, we put different rows into different tables,
+
+   problem: The key problem with this approach is that if the value whose range is used for partitioning isn’t chosen carefully, then the partitioning scheme will lead to unbalanced servers.
+
+2. **Vertical Partitioning**
+
+   In this scheme, we divide our data to store tables related to a specific feature in their own server. For example, if we are building Instagram like application - where we need to store data related to users, photos they upload, and people they follow - we can decide to place user profile information on one DB server, friend lists on another, and photos on a third server.
+
+   problem:  The main problem with this approach is that if our application experiences additional growth, then it may be necessary to further partition a feature specific DB across various servers (e.g. it would not be possible for a single server to handle all the metadata queries for 10 billion photos by 140 million users).
+
+3. **Directory Based Partitioning**
+
+   A loosely coupled approach to work around issues mentioned in the above schemes is to create a lookup service which knows your current partitioning scheme and abstracts it away from the DB access code. So, to find out where a particular data entity resides, we query the directory server that holds the mapping between each tuple key to its DB server. This loosely coupled approach means we can perform tasks like adding servers to the DB pool or changing our partitioning scheme without having an impact on the application.
+
+#### Partitioning Criteria
+
+### Common Problems of Data Partitioning
+
+1. **Joins and Denormalization**
+2. **Referential integrity**
+3. **Rebalancing**
+
+
 
 # File Storage
 
