@@ -45,15 +45,97 @@ Arrays.fill(ar, 10);
 
 
 
+## Generateing random numbers in Java
+
+```java
+// java.util.Random
+// create instance of Random class
+Random rand = new Random();
+// Generate random integers in range 0 to 999
+int rand_int1 = rand.nextInt(1000);
+int rand_int2 = rand.nextInt(1000);
+
+// Math.random()
+// returns a double value with a positive sign, greater than or equal to 0.0 and less than 1.0
+Math.random();
+
+// java.util.concurrent.ThreadLocalRandom class
+// Generate random integers in range 0 to 999
+int rand_int1 = ThreadLocalRandom.current().nextInt();
+double rand_dub1 = ThreadLocalRandom.current().nextDouble();
+boolean rand_bool1 = ThreadLocalRandom.current().nextBoolean();
+```
+
+
+
 
 
 ## java 各个collections的底层结构和对应的时间复杂度
 
 
 
-## Java api
+## RegEx
 
-#### String
+https://www.w3schools.com/java/java_regex.asp
+
+## String
+
+#### convert int to String
+
+```java
+int i=10;  
+String s=String.valueOf(i);//Now it will return "10"  
+
+int i=10;  
+String s=Integer.toString(i);//Now it will return "10"  
+
+int i=200;  
+String s=String.format("%d",i);  
+```
+
+#### join list string
+
+```java
+List<String> list = Arrays.asList("a","b","c");
+String result = String.join(",", list);
+```
+
+#### spilt
+
+```java
+/*
+Parameters:
+regex - a delimiting regular expression
+Limit - the result threshold, default 0
+
+Returns:
+An array of strings computed by splitting the given string.
+
+Throws:
+PatternSyntaxException - if the provided regular expression’s 
+                         syntax is invalid.  
+  
+ limit > 0 : If this is the case then the pattern will be
+            applied at most limit-1 times, the resulting 
+            array’s length will not be more than n, and 
+            the resulting array’s last entry will contain
+            all input beyond the last matched pattern.
+limit < 0 : In this case, the pattern will be applied as
+            many times as possible, and the resulting 
+            array can be of any size.
+limit = 0 : In this case, the pattern will be applied as 
+            many times as possible, the resulting array can 
+            be of any size, and trailing empty strings will
+            be discarded.
+  */
+String str = "geekss@for@geekss";
+String[] arrOfStr = str.split("@", 2); // geekss, for@geekss
+String[] arrOfStr = str.split("@", 5); // geekss, for, geekss
+```
+
+
+
+
 
 ```java
 // int indexOf(char ch, int strt ) : This method returns the index within this string of the first occurrence of the specified character, starting the search at the specified index or -1, if the character does not occur.

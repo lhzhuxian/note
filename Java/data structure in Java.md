@@ -11,6 +11,13 @@
 
 // two dimension array
 // https://www.java67.com/2014/10/how-to-create-and-initialize-two-dimensional-array-java-example.html
+
+// array copy
+int[] array = {23, 43, 55, 12};
+int newLength = array.length;
+int[] copiedArray = Arrays.copyOf(array, newLength);
+int[] copiedArray = Arrays.copyOfRange(array, 1, 4);
+
 ```
 
 

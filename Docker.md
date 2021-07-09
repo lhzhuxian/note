@@ -94,3 +94,9 @@ docker inspect containId
 进入当前正在运行的容器
 
 docker exec -it 容器id
+
+
+
+## A Simple Example of Working with a Proxy
+
+https://www.cloudbees.com/blog/using-docker-behind-a-proxy

@@ -2,41 +2,6 @@
 
 ### OA
 
-```
-1. CloudFront Caching.
-2. Storage Optimization
-
-1.optimizating Box Weight
-2.Subscriber Groups / audible groups
-
-1. Shopping Options
-2. items in containers
-```
-
-
-
-合集
-
-https://aonecode.com/amazon-online-assessment-questions
-
-https://www.1point3acres.com/bbs/forum.php?mod=viewthread&tid=761387&extra=page%3D2%26filter%3Dsortid%26sortid%3D311%26searchoption%5B3046%5D%5Bvalue%5D%3D5%26searchoption%5B3046%5D%5Btype%5D%3Dradio%26searchoption%5B3109%5D%5Bvalue%5D%3D2%26searchoption%5B3109%5D%5Btype%5D%3Dradio%26sortid%3D311%26orderby%3Ddateline
-
-**https://leetcode.com/discuss/interview-question/1183360/Amazon-Online-Assesment-Questions**
-
-https://algo.monster/problems/amazon_online_assessment_questions
-
-https://www.1point3acres.com/bbs/forum.php?mod=viewthread&tid=767814&extra=page%3D1%26filter%3Dsortid%26sortid%3D311%26searchoption%5B3046%5D%5Bvalue%5D%3D5%26searchoption%5B3046%5D%5Btype%5D%3Dradio%26searchoption%5B3109%5D%5Bvalue%5D%3D2%26searchoption%5B3109%5D%5Btype%5D%3Dradio%26sortid%3D311%26orderby%3Ddateline
-
-^^ 重要
-
-https://aonecode.com/amazon-online-assessment-questions#lsv
-
-https://www.teamblind.com/post/Amazon-OA-question-complilation-xjQosyo3
-
-https://www.1point3acres.com/bbs/forum.php?mod=viewthread&tid=715940&extra=page=16&filter=lastpost&orderby=lastpost&sortid=311&sortid=311&orderby=lastpost
-
-
-
 
 
 ### Reorder Data in Log Files
@@ -166,50 +131,39 @@ public class OptimizeBoxWeight {
 
 ### Movies on Flight
 
-- 可能会有变种 https://leetcode.com/discuss/interview-question/1186575/Amazon-OA-May-2021
-- There could be duplicate times
-- We must find a pair whose duration that equals to EXACTLY d - 30
-- There could be more than 1 pair. If there is more than one pair, you choose the pair that's going to have a larger number in it. (eg. `[30, 30]` vs. `[10, 50]`, we would choose `[10, 50]`.
-- Return a pair of indicies.
-- twosum 名字叫In-Flight Media, 虽然是个新题，我有个case没过去，最后答案用two pointer做的话记得sort一下
-
-```java
-// Movies on Flight
-/*
-You are on a flight and wanna watch two movies during this flight.
-
-You are given a list of integers which includes all the movie durations and also given the duration of the flight which is d in minutes.
-
-Now, you need to pick two movies and the total duration of the two movies is less than or equal to (d - 30min).
-
-Find the pair of movies with the longest total duration. If multiple found, return the pair with the longest movie.
+You are on a flight and wanna watch two movies during this flight. You are given a list of integers which includes all the movie durations and also given the duration of the flight which is d in minutes. Now, you need to pick two movies and the total duration of the two movies is less than or equal to (d - 30min). Find the pair of movies with the longest total duration. If multiple found, return the pair with the longest movie.
 
 Input
 The input consists of two arguments:
 
-movie_duration: a list of integers representing the duration of movies
+**movie_duration**: a list of integers representing the duration of movies
 
-d: an integer representing the duration of the flight
+**d**: an integer representing the duration of the flight
 
 Output
+
 return the movies pair.
 
-Examples
-Example 1:
+**Example**
+
+```
 Input:
 movie_duration = [90, 85, 75, 60, 120, 150, 125]
-
 d = 250
-
 Output: [90, 125]
 Explanation:
 90min + 125min = 215 is the maximum number within 220 (250min - 30min)
+```
 
-https://leetcode.com/discuss/interview-question/356960
-*/
-// 知识点： two pointer
-// 本质上是 1099. Two Sum Less Than K
+**Follow up**
 
+1. what if We need to find a pair whose duration that equals to EXACTLY d - 30
+
+**Solution**
+
+1. 先sort数组然后使用双指针来解决
+
+```java
 public class MovieOnFlight {
     public static void main(String[] args) {
         int[] movie_duration1 = {90, 85, 75, 60, 120, 150, 125};
@@ -345,44 +299,39 @@ https://aonecode.com/oa-cloudfront-caching
 ### Solution
 
 1. Underlying problem is to find different connected components in a graph
-2. 类似 number of Islands
+2. 类似 Number of Connected Components in an Undirected Graph
 3. time: O(M+N), space: O(M + N)
 
 ```java
-public class Solution {
-    public int costEvaluation(int n, int[][] connections) {
-        Map<Integer, List<Integer>> graph = new HashMap<>();
-        for(int[] connection: connections) {
-            int node0 = connection[0];
-            int node1 = connection[1];
-            if(!graph.containsKey(node0)) {
-                graph.put(node0, new ArrayList<>());
-            }
-            graph.get(node0).add(node1);
-            if(!graph.containsKey(node1)) {
-                graph.put(node1, new ArrayList<>());
-            }
-            graph.get(node1).add(node0);
-        }
-        int[] visited = new int[n];
-        int result = 0;
+class Solution {
+    public int countComponents(int n, int[][] edges) {
+        Map<Integer, List<Integer>> graph = new HashMap<> ();
         for(int i = 0; i < n; ++i) {
-            int count = 0;
-            count = dfs(i, graph, visited, count);
-            result += Math.ceil(Math.sqrt(count));
+            graph.put(i, new ArrayList<>());
         }
-        return result;
-    }
-    public int dfs(int i, Map<Integer, List<Integer>> graph, int[] visited, int count) {
-        if(visited[i] == 1) {
-            return count;
+        for(int[] edge : edges) {
+            graph.get(edge[0]).add(edge[1]);
+            graph.get(edge[1]).add(edge[0]);
         }
-        visited[i] = 1;
-        count++;
-        for(int j : graph.getOrDefault(i, new ArrayList<>())) {
-            count = dfs(j, graph, visited, count);
+        boolean[] visited = new boolean[n];
+        int count = 0;
+        for(int i = 0; i < n; ++i) {
+            if(dfs(i, graph, visited)) {
+                count++;
+            }    
         }
         return count;
+    }
+    
+    private boolean dfs(int i, Map<Integer, List<Integer>> graph, boolean[] visited) {
+        if(visited[i]) {
+            return false;
+        }
+        visited[i] = true;
+        for(int j : graph.get(i)) {
+            dfs(j, graph, visited);
+        }
+        return true;
     }
 }
 ```
@@ -1055,6 +1004,14 @@ Output: [[1, 3], [3, 2]]
 
 
 ```java
+1 8
+2 7
+3 14
+  
+ 1 5
+2 10
+3 14
+
 private List<int[]> getPairs(List<int[]> a, List<int[]> b, int target) {
         Collections.sort(a, (i,j) -> i[1] - j[1]);
         Collections.sort(b, (i,j) -> i[1] - j[1]);
@@ -1225,45 +1182,33 @@ https://leetcode.com/discuss/interview-question/1031247/Amazon-or-OA-or-No.-of-s
 
 ```java
 // https://leetcode.com/problems/count-of-smaller-numbers-after-self/discuss/445769/merge-sort-CLEAR-simple-EXPLANATION-with-EXAMPLES-O(n-lg-n)
-class Solution {
-    private class ArrayValWithOrigIdx {
-        int val;
-        int originalIdx;
-        
-        public ArrayValWithOrigIdx(int val, int originalIdx) {
-            this.val = val;
-            this.originalIdx = originalIdx;
-        }
+public class numberOfSwap {
+    public static void main(String[] args) {
+        System.out.println(countSmaller(new int[]{5, 4, 1, 2}));
+        System.out.println(countSmaller(new int[]{5,2,6,1}));
     }
-    public List<Integer> countSmaller(int[] nums) {
-        if(nums == null || nums.length == 0) return new LinkedList<Integer> ();
-        int n = nums.length;
-        int[] result = new int[n];
-        
-        ArrayValWithOrigIdx[] newNums = new ArrayValWithOrigIdx[n];
-        for(int i = 0; i< n; ++i) {
-            newNums[i] = new ArrayValWithOrigIdx(nums[i], i);
-        }
-        mergeSortAndCount(newNums, 0, n - 1, result);
-        
-        List<Integer> resultList = new LinkedList<Integer>();
-        for (int i : result) resultList.add(i);
-        return resultList;
+    public static int countSmaller(int[] nums) {
+        if(nums == null || nums.length == 0) return 0;
+        int result = 0;
+
+        result = mergeSortAndCount(nums, 0, nums.length - 1, result);
+
+        return result;
     }
-    
-    private void mergeSortAndCount(ArrayValWithOrigIdx[] nums, int start, int end, int[] result) {
-        if(start >= end) return;
+
+    private static int mergeSortAndCount(int[] nums, int start, int end, int result) {
+        if(start >= end) return result;
         int mid = start + (end - start) / 2;
-        mergeSortAndCount(nums, start, mid, result);
-        mergeSortAndCount(nums, mid + 1, end, result);
-        
+        result = mergeSortAndCount(nums, start, mid, result);
+        result = mergeSortAndCount(nums, mid + 1, end, result);
+
         int leftPos = start;
         int rightPos = mid + 1;
-        List<ArrayValWithOrigIdx> merged = new LinkedList<ArrayValWithOrigIdx>();
+        List<Integer> merged = new LinkedList<Integer>();
         int numElemsRightArrayLessThanLeftArray = 0;
         while(leftPos < mid + 1 && rightPos <= end) {
-            if(nums[leftPos].val > nums[rightPos].val) {
-                 // this code block is exactly what the problem is asking us for:
+            if(nums[leftPos] > nums[rightPos]) {
+                // this code block is exactly what the problem is asking us for:
                 // a number from the right side of the original input array, is smaller
                 // than a number from the left side
                 //
@@ -1272,25 +1217,25 @@ class Solution {
                 // Since left sub-array is already sorted,
                 // nums[rightPos] must also be smaller than the entire remaining left sub-array
                 ++numElemsRightArrayLessThanLeftArray;
-                 // continue with normal merge sort, merge
+                // continue with normal merge sort, merge
                 merged.add(nums[rightPos]);
                 ++rightPos;
             } else {
                 // a number from left side of array, is smaller than a number from
                 // right side of array
-                result[nums[leftPos].originalIdx] += numElemsRightArrayLessThanLeftArray;
-                
+                result += numElemsRightArrayLessThanLeftArray;
+
                 // Continue with normal merge sort
                 merged.add(nums[leftPos]);
                 ++leftPos;
             }
         }
-        
-         
+
+
         // part of normal merge sort, if either left or right sub-array is not empty,
         // move all remaining elements into merged result
         while (leftPos < mid + 1) {
-            result[nums[leftPos].originalIdx] += numElemsRightArrayLessThanLeftArray;
+            result += numElemsRightArrayLessThanLeftArray;
 
             merged.add(nums[leftPos]);
             ++leftPos;
@@ -1299,15 +1244,15 @@ class Solution {
             merged.add(nums[rightPos]);
             ++rightPos;
         }
-        
+
         // part of normal merge sort
         // copy back merged result into array
         int pos = start;
-        for (ArrayValWithOrigIdx m : merged) {
+        for (Integer m : merged) {
             nums[pos] = m;
             ++pos;
         }
-        
+        return result;
     }
 }
 ```

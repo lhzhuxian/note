@@ -1,3 +1,14 @@
+# docker
+
+https://aws.amazon.com/cn/blogs/china/choose-the-best-docker-image-for-your-python-application/
+
+# package
+
+比较好的blog：
+https://github.com/gaborbernat
+
+https://bernat.tech/posts/pep-517-and-python-packaging/
+
 
 
 ## Python type check
@@ -38,6 +49,11 @@ pip install -r requirements.txt
         reader = csv.reader(file)
         for row in reader:
           print(row)
+#write csv file
+with open('employee_file.csv', mode='w') as employee_file:
+    employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    employee_writer.writerow(['John Smith', 'Accounting', 'November'])
+    employee_writer.writerow(['Erica Meyers', 'IT', 'March'])
 ```
 
 ```python
@@ -75,5 +91,34 @@ response = requests.get("https://www.walmart.com.mx/api/v2/content/Shared/Taxono
 
 ```python
 "My name is {fname}, I'm {age}".format(fname = "John", age = 36)
+```
+
+```python
+#Python enumerate(): Simplify Looping With Counters
+>>> for count, value in enumerate(values):
+...     print(count, value)
+...
+0 a
+1 b
+2 c
+```
+
+# Errors and Exceptions
+
+### catching any exception
+
+You would normally only ever consider doing this at the outermost level of your code if for example you wanted to handle any otherwise uncaught exceptions before terminating.
+
+The advantage of `except Exception` over the bare `except` is that there are a few exceptions that it wont catch, most obviously `KeyboardInterrupt` and `SystemExit`: if you caught and swallowed those then you could make it hard for anyone to exit your script.
+
+```python
+import traceback
+import logging
+
+try:
+    whatever()
+except Exception as e:
+    logging.error(traceback.format_exc())
+    # Logs the error appropriately. 
 ```
 
