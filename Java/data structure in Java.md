@@ -30,3 +30,20 @@ Arrays.sort(boxTypes, (a, b) -> b[1] - a[1]);
 Collections.sort()
 ```
 
+
+
+## PriorityQueue
+
+```java
+ // Creating empty priority queue
+PriorityQueue<Integer> pQueue = new PriorityQueue<Integer>();
+ 
+// Adding items to the pQueue using add()
+pQueue.add(10);
+pQueue.add(20);
+pQueue.add(15);
+
+// 10, 20, 15 default是max stack， 排最前面的是最小的值
+ PriorityQueue<Integer> min = new  PriorityQueue<Integer>(Collections.reverseOrder());
+```
+
