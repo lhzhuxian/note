@@ -1,0 +1,4 @@
+g_max_event_count = 50
+g_backlog = 100
+g_maxthread = 4
+g_connec_tolerance = 100

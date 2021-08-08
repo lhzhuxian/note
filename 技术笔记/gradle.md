@@ -1,0 +1,4 @@
+```
+gradle -q dependencies 
+```
+

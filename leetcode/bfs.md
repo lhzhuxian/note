@@ -14,6 +14,12 @@
 
 
 
+# A* Search
+
+有空看一看
+
+
+
 # 二叉树
 
 ## Serialize and Deserialize Binary Tree
@@ -232,6 +238,31 @@ class Solution {
     }
 
 }
+// dfs
+class Solution {
+    List<List<Integer>> levels = new ArrayList<List<Integer>>();
+
+    public void helper(TreeNode node, int level) {
+        // start the current level
+        if (levels.size() == level)
+            levels.add(new ArrayList<Integer>());
+
+         // fulfil the current level
+         levels.get(level).add(node.val);
+
+         // process child nodes for the next level
+         if (node.left != null)
+            helper(node.left, level + 1);
+         if (node.right != null)
+            helper(node.right, level + 1);
+    }
+    
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        if (root == null) return levels;
+        helper(root, 0);
+        return levels;
+    }
+}
 ```
 
 
@@ -407,6 +438,67 @@ class Solution {
       }
       return result;
   }
+}
+```
+
+
+
+------
+
+## 199 Binary Tree Right Side View
+
+Given the `root` of a binary tree, imagine yourself standing on the **right side** of it, return *the values of the nodes you can see ordered from top to bottom*.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2021/02/14/tree.jpg)
+
+```
+Input: root = [1,2,3,null,5,null,4]
+Output: [1,3,4]
+```
+
+**Example 2:**
+
+```
+Input: root = [1,null,3]
+Output: [1,3]
+```
+
+**Example 3:**
+
+```
+Input: root = []
+Output: []
+```
+
+**Solution**
+
+level traversal 然后把最右边的点放入result中就好了
+
+```Java
+class Solution {
+    public List<Integer> rightSideView(TreeNode root) {
+        List<Integer> result = new ArrayList<>();
+        if(root == null) {
+            return result;
+        }
+        
+        Queue<TreeNode> level = new LinkedList<>();
+        level.add(root);
+        while(level.size() != 0) {
+            int size = level.size();
+            result.add(level.peek().val);
+            for(int i = 0; i < size; ++i) {
+                TreeNode cur = level.remove();
+                if(cur.right != null) level.add(cur.right);
+                if(cur.left != null) level.add(cur.left);
+            }
+        }
+        return result;
+    }
 }
 ```
 
@@ -736,6 +828,139 @@ class Solution {
     }
 }
 ```
+
+## 1743 Restore the Array From Adjacent Pairs
+
+There is an integer array `nums` that consists of `n` **unique** elements, but you have forgotten it. However, you do remember every pair of adjacent elements in `nums`.
+
+You are given a 2D integer array `adjacentPairs` of size `n - 1` where each `adjacentPairs[i] = [ui, vi]` indicates that the elements `ui` and `vi` are adjacent in `nums`.
+
+It is guaranteed that every adjacent pair of elements `nums[i]` and `nums[i+1]` will exist in `adjacentPairs`, either as `[nums[i], nums[i+1]]` or `[nums[i+1], nums[i]]`. The pairs can appear **in any order**.
+
+Return *the original array* `nums`*. If there are multiple solutions, return **any of them***.
+
+**Example 1:**
+
+```
+Input: adjacentPairs = [[2,1],[3,4],[3,2]]
+Output: [1,2,3,4]
+Explanation: This array has all its adjacent pairs in adjacentPairs.
+Notice that adjacentPairs[i] may not be in left-to-right order.
+```
+
+**Example 2:**
+
+```
+Input: adjacentPairs = [[4,-2],[1,4],[-3,1]]
+Output: [-2,4,1,-3]
+Explanation: There can be negative numbers.
+Another solution is [-3,1,4,-2], which would also be accepted.
+```
+
+**Example 3:**
+
+```
+Input: adjacentPairs = [[100000,-100000]]
+Output: [100000,-100000]
+```
+
+**Solution**
+
+```java
+class Solution {
+    public int[] restoreArray(int[][] adjacentPairs) {
+        
+        //length of restoredArray would be input length+1
+        int[] restoredArray = new int[adjacentPairs.length+1];
+     
+        Map<Integer, List<Integer>> graph = new HashMap<Integer, List<Integer>>();
+        
+        // 1. Build graph of number -> [adjacent numbers]
+        for(int i= 0; i < adjacentPairs.length; i++){
+             addToGraph(graph, adjacentPairs[i][0], adjacentPairs[i][1]);
+             addToGraph(graph, adjacentPairs[i][1], adjacentPairs[i][0]);
+         }
+        
+         // 2. Find first number with only one adjacent number i.e. in-degree = 1. That wil be our start.
+		 // eg. get -3 or -2 as our start. 
+        //There would always be two elements which satisfy this conditon & starting from either would suffice. 
+         int start = 0;
+         for(int key : graph.keySet()){
+             if(graph.get(key).size()==1){
+                 start = key;
+                 break;
+            }
+         }
+        Set<Integer> seenSet = new HashSet<Integer>();
+        List<Integer> answerList = new ArrayList<Integer>();
+        dfs(start,graph,answerList,seenSet);
+
+        for(int i=0;i<answerList.size();i++){
+            restoredArray[i] = answerList.get(i);
+        }
+        return restoredArray;
+    }
+    
+    /****** Template DFS Code *******/
+    private void dfs(int start,Map<Integer, List<Integer>> graph,List<Integer> answerList,Set<Integer> seenSet){
+        answerList.add(start);
+        seenSet.add(start);
+        List<Integer> neighbors = graph.get(start);
+        //loop over adjacents like you do in BFS, here adjacents are fetched from the constructed graph.
+        for(Integer curr : neighbors){
+            if(!seenSet.contains(curr)){
+                 dfs(curr,graph,answerList,seenSet);
+            }
+        } 
+    }
+	
+    //Utility function which simply builds graph of [numbers] -> [list of adjacent numbers]
+    	// eg. [[4,-2],[1,4],[-3,1]]
+		// map will be  4 ->[-2,1], 1->[-3,4], -2->[4], -3->[1]
+	  private void addToGraph(Map<Integer, List<Integer>> graph, int key, int value) {
+		     if(graph.containsKey(key)){
+                 graph.get(key).add(value);
+             }else{
+                 List<Integer> temp = new ArrayList<Integer>();
+                 temp.add(value);
+                 graph.put(key, temp);
+             }  
+	  }
+    
+    //One can use this BFS function instead of DFS function as well.
+    
+     /****** Template BFS Code *******/
+    /**
+    private void bfs(int start,Map<Integer, List<Integer>> graph,int[] restoredArray){
+         Queue<Integer> bfsQueue = new LinkedList<Integer>();
+         Set<Integer> seenSet = new HashSet<Integer>();
+         bfsQueue.add(start);
+         seenSet.add(start);   
+
+         int index=0;
+
+         while(!bfsQueue.isEmpty()){
+
+             int restoredValue = bfsQueue.poll();
+             List<Integer> neighbors = graph.get(restoredValue);
+             restoredArray[index++] = restoredValue;
+            
+             //loop over adjacents like you do in BFS, here adjacenets are fetched from the constructed graph.
+             for(Integer curr : neighbors){
+                 if(!seenSet.contains(curr)){
+                    bfsQueue.offer(curr);
+                    seenSet.add(curr);
+                 }
+             }
+         }
+    }
+    */
+}
+```
+
+
+
+
 
 # 矩阵
 
@@ -1186,7 +1411,151 @@ Output: [[2,2,2],[2,2,2]]
 
 
 
+## 1263 Minimum Moves to Move a Box to Their Target Location
 
+Storekeeper is a game in which the player pushes boxes around in a warehouse trying to get them to target locations.
+
+The game is represented by a `grid` of size `m x n`, where each element is a wall, floor, or a box.
+
+Your task is move the box `'B'` to the target position `'T'` under the following rules:
+
+- Player is represented by character `'S'` and can move up, down, left, right in the `grid` if it is a floor (empy cell).
+- Floor is represented by character `'.'` that means free cell to walk.
+- Wall is represented by character `'#'` that means obstacle (impossible to walk there). 
+- There is only one box `'B'` and one target cell `'T'` in the `grid`.
+- The box can be moved to an adjacent free cell by standing next to the box and then moving in the direction of the box. This is a **push**.
+- The player cannot walk through the box.
+
+Return the minimum number of **pushes** to move the box to the target. If there is no way to reach the target, return `-1`.
+
+**Example 1:**
+
+**![img](https://assets.leetcode.com/uploads/2019/11/06/sample_1_1620.png)**
+
+```
+Input: grid = [["#","#","#","#","#","#"],
+               ["#","T","#","#","#","#"],
+               ["#",".",".","B",".","#"],
+               ["#",".","#","#",".","#"],
+               ["#",".",".",".","S","#"],
+               ["#","#","#","#","#","#"]]
+Output: 3
+Explanation: We return only the number of times the box is pushed.
+```
+
+**Example 2:**
+
+```
+Input: grid = [["#","#","#","#","#","#"],
+               ["#","T","#","#","#","#"],
+               ["#",".",".","B",".","#"],
+               ["#","#","#","#",".","#"],
+               ["#",".",".",".","S","#"],
+               ["#","#","#","#","#","#"]]
+Output: -1
+```
+
+**Example 3:**
+
+```
+Input: grid = [["#","#","#","#","#","#"],
+               ["#","T",".",".","#","#"],
+               ["#",".","#","B",".","#"],
+               ["#",".",".",".",".","#"],
+               ["#",".",".",".","S","#"],
+               ["#","#","#","#","#","#"]]
+Output: 5
+Explanation:  push the box down, left, left, up and up.
+```
+
+**Example 4:**
+
+```
+Input: grid = [["#","#","#","#","#","#","#"],
+               ["#","S","#",".","B","T","#"],
+               ["#","#","#","#","#","#","#"]]
+Output: -1
+```
+
+**Solution**
+
+we need 2 levels of bfs for this problem. If we dont have a player, it is just a simple bfs. We can push the box in the four directions. With a player in the game, we just need to check for each direction, is the player able to reach the position in order to push the box in that direction.
+
+Time complexity : O(m^4 * n^4)
+
+Space Complexity: O(m*n)
+
+这道题的难点在代码量很大,有空写一遍练一下
+
+```java
+class Solution {
+  
+    char[][] grid;
+    int m, n;
+    int[][] dir = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; // right, down, left, up
+    public int minPushBox(char[][] grid) {
+        this.grid = grid;
+        m = grid.length; 
+        n = grid[0].length;
+        int step = 0;
+        boolean[][][] visited = new boolean[m][n][4]; // considering 4 directons
+        
+        Queue<int[]> boxQ = new LinkedList<>();
+        Queue<int[]> playerQ = new LinkedList<>();
+        int[] boxLoc=new int[2], targetLoc=new int[2] , playerLoc=new int[2];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 'B') boxLoc = new int[]{i, j};
+                if (grid[i][j] == 'T') targetLoc = new int[]{i, j};
+                if (grid[i][j] == 'S') playerLoc = new int[]{i, j};
+            }
+        }
+        boxQ.offer(new int[]{boxLoc[0], boxLoc[1]});
+        playerQ.offer(new int[]{playerLoc[0], playerLoc[1]});
+        
+        while (!boxQ.isEmpty()) { 
+            for (int i = 0, l = boxQ.size(); i < l; i++) { //as we care about all directions, it should be like this.--> it's related to calculating 'step'
+                int[] currBoxLoc = boxQ.poll();
+                int[] currPlayerLoc = playerQ.poll();
+                if (currBoxLoc[0] == targetLoc[0] && currBoxLoc[1] == targetLoc[1]) return step; // If box arrives at the target, it returns 'step'
+                for (int j = 0; j < dir.length; j++) { // Checking all directions
+                    if (visited[currBoxLoc[0]][currBoxLoc[1]][j]) continue;
+                    int[] d = dir[j];
+                    int r0 = currBoxLoc[0] + d[0], c0 = currBoxLoc[1] + d[1];  // where player stands, need a space to push
+                    if (r0 < 0 || r0 >= m || c0 < 0 || c0 >= n || grid[r0][c0] == '#') continue; //if no space, ignore(/continue)
+                    int r = currBoxLoc[0] - d[0], c = currBoxLoc[1] - d[1];  // the box location after pushed
+                    if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] == '#') continue; // if no space for box, ignore(/continue)
+                    if (!reachable(r0, c0, currBoxLoc, currPlayerLoc)) continue; // Check if the player can reach (r0, c0). if not, continue
+                    visited[currBoxLoc[0]][currBoxLoc[1]][j] = true; // After pushed, the player is at 'currBoxLoc'.
+                    boxQ.offer(new int[]{r,c}); // update queues accordingly.
+                    playerQ.offer(new int[]{currBoxLoc[0],currBoxLoc[1]}); 
+                }
+            }
+            step++;
+        }
+        return -1;
+    }
+    
+    private boolean reachable(int i, int j, int[] boxLoc, int[] playerLoc) {
+        // (i,j) is a location where the play will push the box.
+        Queue<int[]> q = new LinkedList<>();
+        q.offer(playerLoc);
+        boolean[][] visited = new boolean[m][n];
+        visited[boxLoc[0]][boxLoc[1]] = true; //player cannot go through the spot where the box is located at.
+        while (!q.isEmpty()) {
+            int[] currPlLoc = q.poll();
+            if (currPlLoc[0] == i && currPlLoc[1] == j) return true;
+            for (int[] d : dir) {
+                int r = currPlLoc[0] + d[0], c = currPlLoc[1] + d[1];   // player's location after moving
+                if (r < 0 || r >= m || c < 0 || c >= n || visited[r][c] || grid[r][c] == '#') continue; // check if player can move to (r,c)
+                visited[r][c] = true; // if possible, check it visited.
+                q.offer(new int[]{r, c});
+            }
+        }
+        return false;
+    }
+}
+```
 
 
 
@@ -1223,7 +1592,7 @@ https://www.lintcode.com/problem/sliding-puzzle-ii/description
 
 
 
-图:
+# 图
 
 133. Clone Graph
 https://leetcode.com/problems/clone-graph/
