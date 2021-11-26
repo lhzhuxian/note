@@ -273,6 +273,66 @@ public class Solution {
     private int quad(int x, int a, int b, int c) {
         return a * x * x + b * x + c;
     }
-}
+```
+
+
+
+
+
+## 319 Bulb Switcher
+
+There are `n` bulbs that are initially off. You first turn on all the bulbs, then you turn off every second bulb.
+
+On the third round, you toggle every third bulb (turning on if it's off or turning off if it's on). For the `ith` round, you toggle every `i` bulb. For the `nth` round, you only toggle the last bulb.
+
+Return *the number of bulbs that are on after `n` rounds*.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/11/05/bulb.jpg)
+
+```
+Input: n = 3
+Output: 1
+Explanation: At first, the three bulbs are [off, off, off].
+After the first round, the three bulbs are [on, on, on].
+After the second round, the three bulbs are [on, off, on].
+After the third round, the three bulbs are [on, off, off]. 
+So you should return 1 because there is only one bulb is on.
+```
+
+**Example 2:**
+
+```
+Input: n = 0
+Output: 0
+```
+
+**Example 3:**
+
+```
+Input: n = 1
+Output: 1
+```
+
+https://leetcode.com/problems/bulb-switcher/discuss/77112/Share-my-o(1)-solution-with-explanation
+
+无论n是多少，每个灯泡被按的次数都数一样的
+
+4 会在1， 2， 4的时候被按，最后是亮的
+
+灯泡n被按i次， i是n的factor number， 所以我们发现 factor number的个数是奇数时，这个灯泡最后会亮着
+
+当n = k^2 的时候，它的factor 个数才是奇书，所以只要找到n中多有的数是perfect square就行了
+
+```java
+class Solution {
+public:
+    int bulbSwitch(int n) {
+        return sqrt(n);
+    }
+};
 ```
 

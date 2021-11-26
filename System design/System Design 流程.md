@@ -67,3 +67,16 @@ https://www.1point3acres.com/bbs/thread-586264-1-1.html
  Instagram的Feed Table数据量单机无法承受的时候，你会怎样Scale up?
 最直接的想法是，对于每个user id做hashing，分别放在不同的机器上。这样说答对了一半，面试官会跟进，问这样会不会造成有的机器很满，有的很空，如果某些机器又满了怎么办？
 要解决这个问题的机制比较复杂，Cassandra的设计给我们提供了很好的设计思路，我们可以使用 Consistent Hashing 的 Hash Ring 来解决 node redistrubtion 的问题。
+
+
+
+
+
+trade off:
+
+1. api 的选择
+
+soap operations can achain messages to keep the server aware of the previous requests. It is necessary for complex transcation when multiple parties invloved. verbose with its xml messge structure and inflexibility
+
+
+

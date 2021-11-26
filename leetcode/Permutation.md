@@ -222,3 +222,78 @@ public class Solution {
 }
 ```
 
+
+
+
+
+## 1053 Previous Permutation With One Swap
+
+Given an array of positive integers `arr` (not necessarily distinct), return *the lexicographically largest permutation that is smaller than* `arr`, that can be **made with exactly one swap** (A *swap* exchanges the positions of two numbers `arr[i]` and `arr[j]`). If it cannot be done, then return the same array.
+
+**Example 1:**
+
+```
+Input: arr = [3,2,1]
+Output: [3,1,2]
+Explanation: Swapping 2 and 1.
+```
+
+**Example 2:**
+
+```
+Input: arr = [1,1,5]
+Output: [1,1,5]
+Explanation: This is already the smallest permutation.
+```
+
+**Example 3:**
+
+```
+Input: arr = [1,9,4,6,7]
+Output: [1,7,4,6,9]
+Explanation: Swapping 9 and 7.
+```
+
+**Example 4:**
+
+```
+Input: arr = [3,1,1,3]
+Output: [1,3,1,3]
+Explanation: Swapping 1 and 3.
+```
+
+**Solution**
+
+注意duplicate的情况
+
+```java
+class Solution {
+    public int[] prevPermOpt1(int[] A) {
+        if (A.length <= 1) return A;
+        int idx = -1;
+		// find the largest i such that A[i] > A[i + 1]
+        for (int i = A.length - 1; i >= 1; i--) {
+            if (A[i] < A[i - 1]) {
+                idx = i - 1;
+                break;
+            }
+        }
+		// the array already sorted, not smaller permutation
+        if (idx == -1) return A;
+        for (int i = A.length - 1; i > idx; i--) {
+			// the second check to skip duplicate numbers
+       // 从后往前找到的第一个比 A[idx]小的数， 就是最大的比A[idx] 小的数
+       // skip duplicate 的原因是 1 9 4 6 7 7 10 这种edge case
+       // 1 7 4 6 9 7 10 比 1 7 4 6 7 9 10 要大，duplicate的时候我们要选最前面那个
+            if (A[i] < A[idx] && A[i] != A[i - 1]) {
+                int tmp = A[i];
+                A[i] = A[idx];
+                A[idx] = tmp;
+                break;
+            }
+        }
+        return A;
+    }
+}
+```
+

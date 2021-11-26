@@ -163,3 +163,47 @@ class Solution {
 
 Lint-604. Window Sum
 https://www.lintcode.com/problem/window-sum/description
+
+## 1004 Max Consecutive Ones III
+
+Given a binary array `nums` and an integer `k`, return *the maximum number of consecutive* `1`*'s in the array if you can flip at most* `k` `0`'s.
+
+**Example 1:**
+
+```
+Input: nums = [1,1,1,0,0,0,1,1,1,1,0], k = 2
+Output: 6
+Explanation: [1,1,1,0,0,1,1,1,1,1,1]
+Bolded numbers were flipped from 0 to 1. The longest subarray is underlined.
+```
+
+**Example 2:**
+
+```
+Input: nums = [0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], k = 3
+Output: 10
+Explanation: [0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1]
+Bolded numbers were flipped from 0 to 1. The longest subarray is underlined.
+```
+
+**Solution**
+
+左指针怎么移动是这个的关键，当我们用完flip的时候，我们移动左指针直到找到第一个0
+
+```java
+class Solution {
+  public int longestOnes(int[] A, int K) {
+        int zeroCount=0,start=0,res=0;
+        for(int end=0;end<A.length;end++){
+            if(A[end] == 0) zeroCount++;
+            while(zeroCount > K){
+                if(A[start] == 0) zeroCount--;
+                start++;
+            }
+            res=Math.max(res,end-start+1);
+        }
+        return res;
+    }
+}
+```
+

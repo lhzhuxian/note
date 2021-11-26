@@ -487,3 +487,25 @@ BQ我觉得多准备几个例子就好，比如conflict怎么办，项目delay�
 
 估计是所谓的behavior那轮，或者有的公司会直接说有个deep dive这样的一轮。一般是让你自己准备一两个项目详细讲，会问的很细，从用了什么技术到为什么做这样的选择，有什么trade off，如果现在让你重新做你会有什么改变的地方之类的。
 估计也有可能会有面试官挑你简历上的项目让你说，所以rule of thumb就是，只要你写在简历上的，你就要很熟悉，能够talk about it。
+
+
+
+
+
+why you’re looking
+
+why is LinkedIn interesting
+
+what technologies are you interested in
+
+
+
+Start at a high level explaining the project (why was it needed, what was it used for, who
+would use it, etc.), then explain what your team did, then what you were responsible for.
+Make sure you have a good understanding of the decisions that were made and a holistic
+understanding of the work. Think about how you would go about helping onboard a new
+employee to your existing team and environment and how you would go about helping
+them understand the ins and outs of your group and how it integrates with your engineering
+organization, how do you work with product, and how does it all fit together? Think about
+how you might do a quick whiteboard illustration around this to help them better understand
+as well.

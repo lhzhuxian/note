@@ -22,7 +22,17 @@
 
 
 
+
+
 # Backpack
+
+
+
+https://zhuanlan.zhihu.com/p/93857890
+
+
+
+
 
 Lint-92. Backpack
 https://www.lintcode.com/problem/backpack/description
@@ -73,6 +83,99 @@ https://leetcode.com/problems/paint-house-ii/
 
 Lint-843. Digital Flip
 https://www.lintcode.com/problem/digital-flip/description
+
+
+
+## 691 Stickers to Spell Word
+
+We are given `n` different types of `stickers`. Each sticker has a lowercase English word on it.
+
+You would like to spell out the given string `target` by cutting individual letters from your collection of stickers and rearranging them. You can use each sticker more than once if you want, and you have infinite quantities of each sticker.
+
+Return *the minimum number of stickers that you need to spell out* `target`. If the task is impossible, return `-1`.
+
+**Note:** In all test cases, all words were chosen randomly from the `1000` most common US English words, and `target` was chosen as a concatenation of two random words.
+
+ 
+
+**Example 1:**
+
+```
+Input: stickers = ["with","example","science"], target = "thehat"
+Output: 3
+Explanation:
+We can use 2 "with" stickers, and 1 "example" sticker.
+After cutting and rearrange the letters of those stickers, we can form the target "thehat".
+Also, this is the minimum number of stickers necessary to form the target string.
+```
+
+**Example 2:**
+
+```
+Input: stickers = ["notice","possible"], target = "basicbasic"
+Output: -1
+Explanation:
+We cannot form the target "basicbasic" from cutting letters from the given stickers.
+```
+
+**Solution**
+
+There are potentially a lot of overlapping sub problems, but meanwhile we don't exactly know what those sub problems are. DP with memoization works pretty well in such cases. The workflow is like backtracking, but with memoization. Here I simply use a sorted string of target as the key for the unordered_map DP. A sorted target results in a unique sub problem for possibly different strings.
+
+```
+dp[s] is the minimum stickers required for string s (-1 if impossible). Note s is sorted.
+clearly, dp[""] = 0, and the problem asks for dp[target].
+```
+
+The DP formula is:
+
+```
+dp[s] = min(1+dp[reduced_s]) for all stickers, 
+here reduced_s is a new string after certain sticker applied
+```
+
+
+
+Optimization: If the target can be spelled out by a group of stickers, at least one of them has to contain character target[0]. So I explicitly require next sticker containing target[0], which significantly reduced the search space.
+
+```java
+class Solution {
+    public int minStickers(String[] stickers, String target) {
+        int m = stickers.length;
+        int[][] mp = new int[m][26];
+        Map<String, Integer> dp = new HashMap<>();
+        for (int i = 0; i < m; i++) 
+            for (char c:stickers[i].toCharArray()) mp[i][c-'a']++;
+        dp.put("", 0);
+        return helper(dp, mp, target);
+    }
+    
+    private int helper(Map<String, Integer> dp, int[][] mp, String target) {
+        if (dp.containsKey(target)) return dp.get(target);
+        int ans = Integer.MAX_VALUE, n = mp.length;
+        int[] tar = new int[26];
+        for (char c:target.toCharArray()) tar[c-'a']++;
+        // try every sticker
+        for (int i = 0; i < n; i++) {
+            // optimization
+            // If this sticker didn't contains first character but contains the character after it and it is unique, it will be picked in the future anyway (when that character become the first character). So we won't miss case in such a optimization.
+            if (mp[i][target.charAt(0)-'a'] == 0) continue;
+            StringBuilder sb = new StringBuilder();
+            // apply a sticker on every character a-z
+            for (int j = 0; j < 26; j++) {
+                if (tar[j] > 0 ) 
+                    for (int k = 0; k < Math.max(0, tar[j]-mp[i][j]); k++)
+                        sb.append((char)('a'+j));
+            }
+            String s = sb.toString();
+            int tmp = helper(dp, mp, s);
+            if (tmp != -1) ans = Math.min(ans, 1+tmp);
+        }
+        dp.put(target, ans == Integer.MAX_VALUE? -1:ans);
+        return dp.get(target);
+    }
+}
+```
 
 
 
@@ -192,6 +295,259 @@ class Solution {
 
 
 
+## 10 Regular Expression Matching
+
+Given an input string `s` and a pattern `p`, implement regular expression matching with support for `'.'` and `'*'` where:
+
+- `'.'` Matches any single character.
+- `'*'` Matches zero or more of the preceding element.
+
+The matching should cover the **entire** input string (not partial).
+
+**Example 1:**
+
+```
+Input: s = "aa", p = "a"
+Output: false
+Explanation: "a" does not match the entire string "aa".
+```
+
+**Example 2:**
+
+```
+Input: s = "aa", p = "a*"
+Output: true
+Explanation: '*' means zero or more of the preceding element, 'a'. Therefore, by repeating 'a' once, it becomes "aa".
+```
+
+**Example 3:**
+
+```
+Input: s = "ab", p = ".*"
+Output: true
+Explanation: ".*" means "zero or more (*) of any character (.)".
+```
+
+**Example 4:**
+
+```
+Input: s = "aab", p = "c*a*b"
+Output: true
+Explanation: c can be repeated 0 times, a can be repeated 1 time. Therefore, it matches "aab".
+```
+
+**Example 5:**
+
+```
+Input: s = "mississippi", p = "mis*is*p*."
+Output: false
+```
+
+**Solution**
+
+```java
+enum Result {
+    TRUE, FALSE
+}
+
+class Solution {
+    Result[][] memo;
+
+    public boolean isMatch(String text, String pattern) {
+        memo = new Result[text.length() + 1][pattern.length() + 1];
+        return dp(0, 0, text, pattern);
+    }
+
+    public boolean dp(int i, int j, String text, String pattern) {
+        if (memo[i][j] != null) {
+            return memo[i][j] == Result.TRUE;
+        }
+        boolean ans;
+        if (j == pattern.length()){
+            ans = i == text.length();
+        } else{
+            boolean first_match = (i < text.length() &&
+                                   (pattern.charAt(j) == text.charAt(i) ||
+                                    pattern.charAt(j) == '.'));
+						// case 1 j后面不是*， 那只要比较当前i,j 是否相同，然后dp[i + 1][j + 1]
+          // case 2 j后面是*, 第一种情况可以不要当前的j，dp[i][j + 2]就行 或者 要j， 比较dp[i + 1][j]
+            if (j + 1 < pattern.length() && pattern.charAt(j+1) == '*'){
+                ans = (dp(i, j+2, text, pattern) ||
+                       first_match && dp(i+1, j, text, pattern));
+            } else {
+                ans = first_match && dp(i+1, j+1, text, pattern);
+            }
+        }
+        memo[i][j] = ans ? Result.TRUE : Result.FALSE;
+        return ans;
+    }
+}
+```
+
+
+
+## 44 Wildcard Matching
+
+Given an input string (`s`) and a pattern (`p`), implement wildcard pattern matching with support for `'?'` and `'*'` where:
+
+- `'?'` Matches any single character.
+- `'*'` Matches any sequence of characters (including the empty sequence).
+
+The matching should cover the **entire** input string (not partial).
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "aa", p = "a"
+Output: false
+Explanation: "a" does not match the entire string "aa".
+```
+
+**Example 2:**
+
+```
+Input: s = "aa", p = "*"
+Output: true
+Explanation: '*' matches any sequence.
+```
+
+**Example 3:**
+
+```
+Input: s = "cb", p = "?a"
+Output: false
+Explanation: '?' matches 'c', but the second letter is 'a', which does not match 'b'.
+```
+
+**Example 4:**
+
+```
+Input: s = "adceb", p = "*a*b"
+Output: true
+Explanation: The first '*' matches the empty sequence, while the second '*' matches the substring "dce".
+```
+
+**Example 5:**
+
+```
+Input: s = "acdcb", p = "a*c?b"
+Output: false
+```
+
+**Solution**
+
+The original post has DP 2d array index from high to low, which is not quite intuitive.
+
+Below is another 2D dp solution. Ideal is identical.
+
+dp[i][j] denotes whether s[0....i-1] matches p[0.....j-1],
+
+First, we need to initialize dp[i][0], i= [1,m]. All the dp[i][0] should be false because p has nothing in it.
+
+Then, initialize dp[0][j], j = [1, n]. In this case, s has nothing, to get dp[0][j] = true, p must be '*', '**', '***',etc. Once p.charAt(j-1) != '*', all the dp[0][j] afterwards will be false.
+
+Then start the typical DP loop.
+
+Though this solution is clear and easy to understand. It is not good enough in the interview. it takes O(mn) time and O(mn) space.
+
+Improvement: 1) optimize 2d dp to 1d dp, this will save space, reduce space complexity to O(N). 2) use iterative 2-pointer.
+
+```java
+
+class Solution {
+    public boolean isMatch(String s, String p) {
+        int m=s.length(), n=p.length();
+	boolean[][] dp = new boolean[m+1][n+1];
+	dp[0][0] = true;
+	for (int i=1; i<=m; i++) {
+		dp[i][0] = false;
+	}
+	
+	for(int j=1; j<=n; j++) {
+		if(p.charAt(j-1)=='*'){
+			dp[0][j] = true;
+		} else {
+			break;
+		}
+	}
+	
+	for(int i=1; i<=m; i++) {
+		for(int j=1; j<=n; j++) {
+			if (p.charAt(j-1)!='*') {
+				dp[i][j] = dp[i-1][j-1] && (s.charAt(i-1)==p.charAt(j-1) || p.charAt(j-1)=='?');
+			} else {
+				dp[i][j] = dp[i-1][j] || dp[i][j-1];
+			}
+		}
+	}
+	return dp[m][n];
+    }
+}
+
+```
+
+
+
+
+
+
+
+## 718 Maximum Length of Repeated Subarray
+
+Given two integer arrays `nums1` and `nums2`, return *the maximum length of a subarray that appears in **both** arrays*.
+
+ 
+
+**Example 1:**
+
+```
+Input: nums1 = [1,2,3,2,1], nums2 = [3,2,1,4,7]
+Output: 3
+Explanation: The repeated subarray with maximum length is [3,2,1].
+```
+
+**Example 2:**
+
+```
+Input: nums1 = [0,0,0,0,0], nums2 = [0,0,0,0,0]
+Output: 5
+```
+
+ 
+
+**Solution**
+
+```java
+class Solution {
+    public int findLength(int[] A, int[] B) {
+        if(A == null||B == null) return 0;
+        int m = A.length;
+        int n = B.length;
+        int max = 0;
+        //dp[i][j] is the length of longest common subarray ending with nums[i] and nums[j]
+        int[][] dp = new int[m + 1][n + 1];
+        for(int i = 0;i <= m;i++){
+            for(int j = 0;j <= n;j++){
+                if(i == 0 || j == 0){
+                    dp[i][j] = 0;
+                }
+                else{
+                    if(A[i - 1] == B[j - 1]){
+                        dp[i][j] = 1 + dp[i - 1][j - 1];
+                        max = Math.max(max,dp[i][j]);
+                    }
+                }
+            }
+        }
+        return max;
+    }
+}
+```
+
+
+
 ## Edit Distance
 
 Given two strings `word1` and `word2`, return *the minimum number of operations required to convert `word1` to `word2`*.
@@ -277,6 +633,64 @@ class Solution {
     }
     return d[n][m];
   }
+}
+```
+
+
+
+
+
+## 403 Frog Jump
+
+A frog is crossing a river. The river is divided into some number of units, and at each unit, there may or may not exist a stone. The frog can jump on a stone, but it must not jump into the water.
+
+Given a list of `stones`' positions (in units) in sorted **ascending order**, determine if the frog can cross the river by landing on the last stone. Initially, the frog is on the first stone and assumes the first jump must be `1` unit.
+
+If the frog's last jump was `k` units, its next jump must be either `k - 1`, `k`, or `k + 1` units. The frog can only jump in the forward direction.
+
+ 
+
+**Example 1:**
+
+```
+Input: stones = [0,1,3,5,6,8,12,17]
+Output: true
+Explanation: The frog can jump to the last stone by jumping 1 unit to the 2nd stone, then 2 units to the 3rd stone, then 2 units to the 4th stone, then 3 units to the 6th stone, 4 units to the 7th stone, and 5 units to the 8th stone.
+```
+
+**Example 2:**
+
+```
+Input: stones = [0,1,2,3,4,8,9,11]
+Output: false
+Explanation: There is no way to jump to the last stone as the gap between the 5th and 6th stone is too large.
+```
+
+ **Solution**
+
+```java
+public class Solution {
+    // 可以用set来减少找到下个点的时间
+    public boolean canCross(int[] stones) {
+        // dp[i] represent the jump size that frog can make when it is in stone i
+        HashMap<Integer, Set<Integer>> dp = new HashMap<>();
+        for(int stone : stones) {
+            dp.put(stone, new HashSet<>());
+        }
+        dp.get(stones[0]).add(1);
+        for(int stone : stones) {
+            Set<Integer> jumpSizes = dp.get(stone);
+            for(int jump : jumpSizes) {
+                for(int i = -1; i <= 1; ++i) {
+                    if(dp.containsKey(jump + stone)) {
+                        // cannot jump back
+                        dp.get(jump + stone).add(jump + i > 0? jump + i: 0);
+                    }
+                }
+            }
+        }
+        return dp.get(stones[stones.length - 1]).size() > 0;
+    }
 }
 ```
 
@@ -553,6 +967,60 @@ https://leetcode.com/problems/scramble-string/
 
 # Matrix
 
+## 221 Maximal Square
+
+Given an `m x n` binary `matrix` filled with `0`'s and `1`'s, *find the largest square containing only* `1`'s *and return its area*.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/11/26/max1grid.jpg)
+
+```
+Input: matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
+Output: 4
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/11/26/max2grid.jpg)
+
+```
+Input: matrix = [["0","1"],["1","0"]]
+Output: 1
+```
+
+**Example 3:**
+
+```
+Input: matrix = [["0"]]
+Output: 0
+```
+
+**Solution**
+
+```java
+public class Solution {
+    public int maximalSquare(char[][] matrix) {
+        int rows = matrix.length, cols = rows > 0 ? matrix[0].length : 0;
+        int[][] dp = new int[rows + 1][cols + 1];
+        int maxsqlen = 0;
+        for (int i = 1; i <= rows; i++) {
+            for (int j = 1; j <= cols; j++) {
+                if (matrix[i-1][j-1] == '1'){
+                    dp[i][j] = Math.min(Math.min(dp[i][j - 1], dp[i - 1][j]), dp[i - 1][j - 1]) + 1;
+                    maxsqlen = Math.max(maxsqlen, dp[i][j]);
+                }
+            }
+        }
+        return maxsqlen * maxsqlen;
+    }
+}
+```
+
+
+
 62. Unique Paths
 https://leetcode.com/problems/unique-paths/
 
@@ -662,6 +1130,149 @@ class Solution {
 
 
 # DFS + Memorization
+
+
+
+## 139 Word Break
+
+Given a string `s` and a dictionary of strings `wordDict`, return `true` if `s` can be segmented into a space-separated sequence of one or more dictionary words.
+
+**Note** that the same word in the dictionary may be reused multiple times in the segmentation.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "leetcode", wordDict = ["leet","code"]
+Output: true
+Explanation: Return true because "leetcode" can be segmented as "leet code".
+```
+
+**Example 2:**
+
+```
+Input: s = "applepenapple", wordDict = ["apple","pen"]
+Output: true
+Explanation: Return true because "applepenapple" can be segmented as "apple pen apple".
+Note that you are allowed to reuse a dictionary word.
+```
+
+**Example 3:**
+
+```
+Input: s = "catsandog", wordDict = ["cats","dog","sand","and","cat"]
+Output: false
+```
+
+**Solution**
+
+Time complexity: O(n^3)
+
+Space Complexity: O(n)
+
+```java
+class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        return dfs(s, new HashSet<>(wordDict), 0, new Boolean[s.length()]);    
+    }
+    
+    private boolean dfs(String s, Set<String> wordDict, int start, Boolean[] memo) {
+        if(start == s.length()) {
+            return true;
+        }
+        if(memo[start] != null) {
+            return memo[start];
+        }
+        
+        for(int end = start + 1; end <= s.length(); end++) {
+            if(wordDict.contains(s.substring(start, end)) && dfs(s, wordDict, end, memo)) {
+                return memo[start] = true;
+            }
+        }
+        return memo[start] = false;
+    }
+    
+    
+}
+```
+
+
+
+## 140 Word Break II
+
+Given a string `s` and a dictionary of strings `wordDict`, add spaces in `s` to construct a sentence where each word is a valid dictionary word. Return all such possible sentences in **any order**.
+
+**Note** that the same word in the dictionary may be reused multiple times in the segmentation.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "catsanddog", wordDict = ["cat","cats","and","sand","dog"]
+Output: ["cats and dog","cat sand dog"]
+```
+
+**Example 2:**
+
+```
+Input: s = "pineapplepenapple", wordDict = ["apple","pen","applepen","pine","pineapple"]
+Output: ["pine apple pen apple","pineapple pen apple","pine applepen apple"]
+Explanation: Note that you are allowed to reuse a dictionary word.
+```
+
+**Example 3:**
+
+```
+Input: s = "catsandog", wordDict = ["cats","dog","sand","and","cat"]
+Output: []
+```
+
+**Solution**
+
+In the worst case the runtime of this algorithm is O(2^n).
+
+Consider the input "aaaaaa", with wordDict = ["a", "aa", "aaa", "aaaa", "aaaaa", "aaaaa"]. Every possible partition is a valid sentence, and there are 2^n-1 such partitions. It should be clear that the algorithm cannot do better than this since it generates all valid sentences. The cost of iterating over cached results will be exponential, as every possible partition will be cached, resulting in the same runtime as regular backtracking. Likewise, the space complexity will also be O(2^n) for the same reason - every partition is stored in memory.
+
+Where this algorithm improves on regular backtracking is in a case like this: "aaaaab", with wordDict = ["a", "aa", "aaa", "aaaa", "aaaaa", "aaaaa"], i.e. the worst case scenario for Word Break I, where no partition is valid due to the last letter 'b'. In this case there are no cached results, and the runtime improves from O(2^n) to O(n^2).
+
+One way to explain O(2^n) is as follows: given an array of length n, there are n+1 ways/intervals to partition it into two parts. Each interval has two choices - split or not. In the worse case, we will have to check all possibilities, which becomes O(2^(n+1)) -> O(2^n). This analysis is similar to palindrome partitioning.
+
+```java
+class Solution {
+   public List<String> wordBreak(String s, List<String> wordDict) {
+    return DFS(s, new HashSet<>(wordDict), new HashMap<String, LinkedList<String>>());
+}       
+
+// DFS function returns an array including all substrings derived from s.
+List<String> DFS(String s, Set<String> wordDict, HashMap<String, LinkedList<String>>map) {
+    if (map.containsKey(s)) 
+        return map.get(s);
+        
+    LinkedList<String>res = new LinkedList<String>();     
+    if (s.length() == 0) {
+        res.add("");
+        return res;
+    }               
+    for (String word : wordDict) {
+        if (s.startsWith(word)) {
+            List<String>sublist = DFS(s.substring(word.length()), wordDict, map);
+            for (String sub : sublist) 
+                res.add(word + (sub.isEmpty() ? "" : " ") + sub);               
+        }
+    }       
+    map.put(s, res);
+    return res;
+}
+}
+```
+
+
+
+
+
+
 
 ## Minimum Insertion Steps to Make a String Palindrome
 
@@ -936,9 +1547,232 @@ class Solution {
 
 55. Jump Game
 https://leetcode.com/problems/jump-game/
-
 45. Jump Game II
 https://leetcode.com/problems/jump-game-ii/
-
 763. Partition Labels
 https://leetcode.com/problems/partition-labels/
+
+
+
+# Jump Game
+
+## 55 Jump Game
+
+You are given an integer array `nums`. You are initially positioned at the array's **first index**, and each element in the array represents your maximum jump length at that position.
+
+Return `true` *if you can reach the last index, or* `false` *otherwise*.
+
+ 
+
+**Example 1:**
+
+```
+Input: nums = [2,3,1,1,4]
+Output: true
+Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last index.
+```
+
+**Example 2:**
+
+```
+Input: nums = [3,2,1,0,4]
+Output: false
+Explanation: You will always arrive at index 3 no matter what. Its maximum jump length is 0, which makes it impossible to reach the last index.
+```
+
+
+
+**Solution**
+
+dp[i] 代表能否从这个跳到终点，从后build这个dp就行了。 一个问题是dp[i] 要遍历一遍整个 i + 1 到end， 其实仔细一想，我们不用去考虑这么多，我们track一个目前最近的点能到终点，对每个i我们检查一下是不是能跳到那儿就行了
+
+```java
+class Solution {
+    public boolean canJump(int[] nums) {
+        int loc = nums.length - 1;
+        for(int i = nums.length -2; i >= 0; --i) {
+            if(nums[i] + i >= loc) {
+                loc = i;
+            }
+        }
+        return loc == 0;
+    }
+}
+```
+
+
+
+## 403 Frog Jump
+
+A frog is crossing a river. The river is divided into some number of units, and at each unit, there may or may not exist a stone. The frog can jump on a stone, but it must not jump into the water.
+
+Given a list of `stones`' positions (in units) in sorted **ascending order**, determine if the frog can cross the river by landing on the last stone. Initially, the frog is on the first stone and assumes the first jump must be `1` unit.
+
+If the frog's last jump was `k` units, its next jump must be either `k - 1`, `k`, or `k + 1` units. The frog can only jump in the forward direction.
+
+ 
+
+**Example 1:**
+
+```
+Input: stones = [0,1,3,5,6,8,12,17]
+Output: true
+Explanation: The frog can jump to the last stone by jumping 1 unit to the 2nd stone, then 2 units to the 3rd stone, then 2 units to the 4th stone, then 3 units to the 6th stone, 4 units to the 7th stone, and 5 units to the 8th stone.
+```
+
+**Example 2:**
+
+```
+Input: stones = [0,1,2,3,4,8,9,11]
+Output: false
+Explanation: There is no way to jump to the last stone as the gap between the 5th and 6th stone is too large.
+```
+
+ **Solution**
+
+```java
+public class Solution {
+    // 可以用set来减少找到下个点的时间
+    public boolean canCross(int[] stones) {
+        // dp[i] represent the jump size that frog can make when it is in stone i
+        HashMap<Integer, Set<Integer>> dp = new HashMap<>();
+        for(int stone : stones) {
+            dp.put(stone, new HashSet<>());
+        }
+        dp.get(stones[0]).add(1);
+        for(int stone : stones) {
+            Set<Integer> jumpSizes = dp.get(stone);
+            for(int jump : jumpSizes) {
+                for(int i = -1; i <= 1; ++i) {
+                    if(dp.containsKey(jump + stone)) {
+                        // cannot jump back
+                        dp.get(jump + stone).add(jump + i > 0? jump + i: 0);
+                    }
+                }
+            }
+        }
+        return dp.get(stones[stones.length - 1]).size() > 0;
+    }
+}
+```
+
+
+
+## 1345 Jump Game IV
+
+Given an array of integers `arr`, you are initially positioned at the first index of the array.
+
+In one step you can jump from index `i` to index:
+
+- `i + 1` where: `i + 1 < arr.length`.
+- `i - 1` where: `i - 1 >= 0`.
+- `j` where: `arr[i] == arr[j]` and `i != j`.
+
+Return *the minimum number of steps* to reach the **last index** of the array.
+
+Notice that you can not jump outside of the array at any time.
+
+ 
+
+**Example 1:**
+
+```
+Input: arr = [100,-23,-23,404,100,23,23,23,3,404]
+Output: 3
+Explanation: You need three jumps from index 0 --> 4 --> 3 --> 9. Note that index 9 is the last index of the array.
+```
+
+**Example 2:**
+
+```
+Input: arr = [7]
+Output: 0
+Explanation: Start index is the last index. You don't need to jump.
+```
+
+**Example 3:**
+
+```
+Input: arr = [7,6,9,6,9,6,9,7]
+Output: 1
+Explanation: You can jump directly from index 0 to index 7 which is last index of the array.
+```
+
+**Example 4:**
+
+```
+Input: arr = [6,1,9]
+Output: 2
+```
+
+**Example 5:**
+
+```
+Input: arr = [11,22,7,7,7,7,7,7,7,22,13]
+Output: 3
+```
+
+**Solution**
+
+其实是一道bfs
+
+```java
+class Solution {
+    public int minJumps(int[] arr) {
+        int n = arr.length;
+        if (n <= 1) {
+            return 0;
+        }
+
+        Map<Integer, List<Integer>> graph = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            graph.computeIfAbsent(arr[i], v -> new LinkedList<>()).add(i);
+        }
+
+        List<Integer> curs = new LinkedList<>(); // store current layer
+        curs.add(0);
+        Set<Integer> visited = new HashSet<>();
+        int step = 0;
+
+        // when current layer exists
+        while (!curs.isEmpty()) {
+            List<Integer> nex = new LinkedList<>();
+
+            // iterate the layer
+            for (int node : curs) {
+                // check if reached end
+                if (node == n - 1) {
+                    return step;
+                }
+
+                // check same value
+                for (int child : graph.get(arr[node])) {
+                    if (!visited.contains(child)) {
+                        visited.add(child);
+                        nex.add(child);
+                    }
+                }
+
+                // clear the list to prevent redundant search
+                graph.get(arr[node]).clear();
+
+                // check neighbors
+                if (node + 1 < n && !visited.contains(node + 1)) {
+                    visited.add(node + 1);
+                    nex.add(node + 1);
+                }
+                if (node - 1 >= 0 && !visited.contains(node - 1)) {
+                    visited.add(node - 1);
+                    nex.add(node - 1);
+                }
+            }
+
+            curs = nex;
+            step++;
+        }
+
+        return -1;
+    }
+}
+```
+

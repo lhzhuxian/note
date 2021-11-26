@@ -1,0 +1,11 @@
+8 Bit = 1 byte
+
+1KB = 1024 Bytes 
+
+1MB = 1024 KB
+
+1GB = 1024MB
+
+1TB = 1024 GB
+
+1 PB = 1024TB

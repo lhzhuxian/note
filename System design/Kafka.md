@@ -116,3 +116,25 @@ Producer将数据写入kafka后，集群就需要对数据进行保存了！kafk
 　　3、 根据找到的相对offset为4的索引确定message存储的物理偏移位置为256。打开数据文件，从位置为256的那个地方开始顺序扫描直到找到offset为368801的那条Message。
 
 　　这套机制是建立在offset为有序的基础上，利用**segment**+**有序offset**+**稀疏索引**+**二分查找**+**顺序查找**等多种手段来高效的查找数据！至此，消费者就能拿到需要处理的数据进行处理了。那每个消费者又是怎么记录自己消费的位置呢？在早期的版本中，消费者将消费到的offset维护zookeeper中，consumer每间隔一段时间上报一次，这里容易导致重复消费，且性能不好！在新的版本中消费者消费到的offset已经直接维护在kafk集群的__consumer_offsets这个topic中！
+
+
+
+
+
+**How to achieve strict ordering with Apache Kafka?**
+
+The simple answer to this particular question is: Yes. If you want a strict order of **all** messages going to one topic, then you must use only **one** partition. However, a higher number of partitions is preferable for high throughput in Kafka, and these two factors can seem incompatible with each other.
+
+**But** , in most cases, we have seen that people rather than the above statement, would prefer messages to be ordered based on a certain property in the message. This means that you, can use multiple partitions and still reach the result you wish for, i.e a strict order of messages while using numerous partitions.
+
+**For example:**
+
+If you have a topic with *user actions* which must be ordered, but only ordered per user, the need for using only one partition is no longer needed. This action can be supported by having multiple partitions but using a consistent message key, for example, user id. This will guarantee that all messages for a certain user always ends up in the same partition and thus is ordered.
+
+A consumer will consume from one or more partition, but you will never have two consumers consuming from one partition. So in the case above, if you have 10 partitions and you use 10 consumers, one consumer will get all messages related to the same user and thus be processed in order.
+
+
+
+# Scalability of Kafka Messaging using Consumer Groups
+
+https://blog.cloudera.com/scalability-of-kafka-messaging-using-consumer-groups/
